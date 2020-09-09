@@ -1,6 +1,7 @@
 defmodule TradeIndicators.Util do
   alias Decimal, as: D
   alias Enum, as: E
+  alias Map, as: M
 
   @zero D.new(0)
 
@@ -19,7 +20,7 @@ defmodule TradeIndicators.Util do
   def decimals(some_map) when is_map(some_map) do
     some_map
     |> E.map(fn {k, v} -> {k, dec(v)} end)
-    |> Map.new()
+    |> M.new()
   end
 
   def context(func) when is_function(func),

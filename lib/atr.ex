@@ -11,6 +11,7 @@ defmodule Indicators.ATR do
   alias Decimal, as: D
   alias List, as: L
   alias Enum, as: E
+  alias Map, as: M
 
   @zero D.new(0)
 
@@ -76,7 +77,7 @@ defmodule Indicators.ATR do
     else
       atr_list
       |> L.last()
-      |> Map.get(:avg)
+      |> M.get(:avg)
       |> (fn last_tr -> {last_tr, new_tr} end).()
       |> MA.ema(period)
     end
