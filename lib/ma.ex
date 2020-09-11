@@ -1,4 +1,4 @@
-defmodule Indicators.MA do
+defmodule TradeIndicators.MA do
   alias TradeIndicators.Util, as: U
   alias Decimal, as: D
   alias Enum, as: E

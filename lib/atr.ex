@@ -1,24 +1,27 @@
-defmodule Indicators.ATR.Item do
-  defstruct avg: nil,
-            tr: nil,
-            t: nil
-end
-
-defmodule Indicators.ATR do
-  alias Indicators.ATR.Item
-  alias Indicators.ATR
-  alias Indicators.MA
+defmodule TradeIndicators.ATR do
+  use TypedStruct
+  alias __MODULE__, as: ATR
+  alias __MODULE__.Item
+  alias TradeIndicators.MA
   alias TradeIndicators.Util, as: U
   alias Decimal, as: D
   alias List, as: L
   alias Enum, as: E
   alias Map, as: M
 
-  @zero D.new(0)
+  typedstruct do
+    field :list, List.t(), default: []
+    field :period, pos_integer(), default: 14
+    field :method, :ema | :wma, default: :ema
+  end
 
-  defstruct list: [],
-            period: 14,
-            method: :ema
+  typedstruct module: Item do
+    field :avg, D.t() | nil, default: nil
+    field :tr, D.t() | nil, default: nil
+    field :t, non_neg_integer()
+  end
+
+  @zero D.new(0)
 
   def step(chart = %ATR{list: atr_list, period: period, method: method}, bars)
       when is_list(bars) and is_list(atr_list) and is_integer(period) and period > 1 do

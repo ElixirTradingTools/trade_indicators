@@ -1,21 +1,34 @@
-defmodule Indicators.MACD do
-  alias Indicators.MACD
-  alias Indicators.MA
+defmodule TradeIndicators.MACD do
+  use TypedStruct
+  alias __MODULE__, as: MACD
+  alias TradeIndicators.MA
   alias TradeIndicators.Util, as: U
   alias Decimal, as: D
   alias Enum, as: E
   alias List, as: L
+  alias Map, as: M
 
-  defstruct list: [],
-            chart_len: 1_000,
-            ema1_len: 12,
-            ema2_len: 26,
-            ema3_len: 9
+  typedstruct do
+    field :list, List.t(), default: []
+    field :chart_len, pos_integer(), default: 1_000
+    field :ema1_len, pos_integer(), default: 12
+    field :ema2_len, pos_integer(), default: 26
+    field :ema3_len, pos_integer(), default: 9
+  end
+
+  typedstruct module: Item do
+    field :ema1, D.t() | nil
+    field :ema2, D.t() | nil
+    field :macd, D.t() | nil
+    field :sig, D.t() | nil
+    field :his, D.t() | nil
+    field :t, non_neg_integer()
+  end
 
   defp get_prev_macd(macd_list) when is_list(macd_list) do
     case L.last(macd_list) do
       nil -> {nil, nil, nil}
-      %{ema1: a, ema2: b, sig: c} -> {a, b, c}
+      %Item{ema1: a, ema2: b, sig: c} -> {a, b, c}
     end
   end
 
@@ -25,7 +38,7 @@ defmodule Indicators.MACD do
     case {length(tail), L.first(tail), tail} do
       {l, _, _} when l < len -> nil
       {_, %{^key => nil}, _} -> nil
-      {_, _, tail} -> tail |> E.reduce(0, &D.add(&1[key], &2)) |> D.div(len)
+      {_, _, tail} -> tail |> E.reduce(0, &D.add(M.get(&1, key), &2)) |> D.div(len)
     end
   end
 
@@ -77,7 +90,7 @@ defmodule Indicators.MACD do
     new_signal_pt = get_avg({:macd, macd_list, new_macd_line_pt}, signal_prev, len3)
     new_histogram_pt = dif(new_macd_line_pt, new_signal_pt)
 
-    new_macd_map = %{
+    new_macd_map = %Item{
       ema1: new_ema12_pt,
       ema2: new_ema26_pt,
       macd: new_macd_line_pt,

@@ -1,10 +1,10 @@
-defmodule Tests.ATR do
+defmodule TradeIndicators.Tests.ATR do
   use ExUnit.Case
   alias TradeIndicators.Util, as: U
-  alias Indicators.ATR
+  alias TradeIndicators.ATR
   alias Enum, as: E
 
-  @msft_data Tests.Fixtures.fixture(:msft_m1_2020_07_27)
+  @msft_data TradeIndicators.Tests.Fixtures.fixture(:msft_m1_2020_07_27)
   @tr [0.00, 1.35, 0.08, 0.14, 0.21, 0.15, 0.09, 0.69, 0.40, 1.25] ++
         [0.68, 0.42, 0.56, 0.56, 0.48, 0.68, 0.43, 0.25, 0.63, 0.41] ++
         [0.23, 0.11, 0.27, 0.42, 0.15, 0.29, 0.16, 0.21, 0.37, 0.23] ++

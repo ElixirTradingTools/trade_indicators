@@ -1,10 +1,10 @@
-defmodule Tests.RSI do
+defmodule TradeIndicators.Tests.RSI do
   use ExUnit.Case
   alias TradeIndicators.Util, as: U
-  alias Indicators.RSI
+  alias TradeIndicators.RSI
   alias Enum, as: E
 
-  @msft_data Tests.Fixtures.fixture(:msft_m1_2020_08_17)
+  @msft_data TradeIndicators.Tests.Fixtures.fixture(:msft_m1_2020_08_17)
   @expected_rsi_values [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] ++
                          [62.22, 65.01, 52.65, 52.29, 57.78, 60.82, 61.77, 56.71, 57.19, 54.02] ++
                          [55.95, 52.50, 53.65, 56.50, 60.02, 63.08, 62.81, 62.52, 62.21, 66.50] ++

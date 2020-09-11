@@ -25,7 +25,8 @@ defmodule TradeIndicators.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:decimal, "~> 1.0"}
+      {:decimal, "~> 1.0"},
+      {:typed_struct, "~> 0.2.1"}
     ]
   end
 end

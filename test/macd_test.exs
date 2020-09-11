@@ -1,11 +1,11 @@
-defmodule Tests.MACD do
+defmodule TradeIndicators.Tests.MACD do
   use ExUnit.Case
-  alias Indicators.MACD
+  alias TradeIndicators.MACD
   alias TradeIndicators.Util, as: U
   alias Decimal, as: D
   alias Enum, as: E
 
-  @msft_data Tests.Fixtures.fixture(:msft_m1_2020_07_27)
+  @msft_data TradeIndicators.Tests.Fixtures.fixture(:msft_m1_2020_07_27)
   @histogram [0.06, 0.06, 0.06, 0.06, 0.03, 0.01, -0.01]
   @signal [0.13, 0.14, 0.16, 0.17, 0.18, 0.18, 0.18]
   @macd [0.12, 0.10, 0.10, 0.11, 0.12, 0.12, 0.14, 0.16, 0.19, 0.20, 0.22, 0.23, 0.22, 0.19, 0.17]
@@ -36,7 +36,7 @@ defmodule Tests.MACD do
       U.context(fn ->
         {%{list: macd_list}, _} =
           @msft_data
-          |> E.reduce({%Indicators.MACD{}, []}, fn bar, {state, bars} ->
+          |> E.reduce({%MACD{}, []}, fn bar, {state, bars} ->
             bars = bars ++ [bar]
             state = MACD.step(state, bars)
             {state, bars}

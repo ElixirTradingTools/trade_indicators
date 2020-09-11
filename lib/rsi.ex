@@ -1,22 +1,25 @@
-defmodule Indicators.RSI.Item do
-  defstruct value: nil,
-            avg_gain: nil,
-            avg_loss: nil,
-            gain: nil,
-            loss: nil,
-            t: 0
-end
-
-defmodule Indicators.RSI do
-  alias Indicators.RSI
-  alias Indicators.MA
+defmodule TradeIndicators.RSI do
+  use TypedStruct
+  alias __MODULE__, as: RSI
+  alias __MODULE__.Item
+  alias TradeIndicators.MA
   alias TradeIndicators.Util, as: U
-  alias Indicators.RSI.Item
   alias Decimal, as: D
   alias Enum, as: E
 
-  defstruct list: [],
-            period: 14
+  typedstruct do
+    field :list, List.t(), default: []
+    field :period, pos_integer(), default: 14
+  end
+
+  typedstruct module: Item do
+    field :value, D.t() | nil, default: nil
+    field :avg_gain, D.t() | nil, default: nil
+    field :avg_loss, D.t() | nil, default: nil
+    field :gain, D.t() | nil, default: nil
+    field :loss, D.t() | nil, default: nil
+    field :t, non_neg_integer(), default: 0
+  end
 
   @zero D.new(0)
   @one_hundred D.new(100)

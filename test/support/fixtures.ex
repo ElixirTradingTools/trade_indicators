@@ -1,4 +1,4 @@
-defmodule Tests.Fixtures do
+defmodule TradeIndicators.Tests.Fixtures do
   alias TradeIndicators.Util, as: U
   alias Enum, as: E
   alias Map, as: M

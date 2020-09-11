@@ -1,7 +1,7 @@
-defmodule Tests.MovingAverage do
+defmodule TradeIndicators.Tests.MovingAverage do
   use ExUnit.Case
   alias TradeIndicators.Util, as: U
-  alias Indicators.MA
+  alias TradeIndicators.MA
   alias Decimal, as: D
 
   @fixture [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5]
