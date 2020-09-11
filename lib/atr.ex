@@ -6,6 +6,7 @@ end
 
 defmodule Indicators.ATR do
   alias Indicators.ATR.Item
+  alias Indicators.ATR
   alias Indicators.MA
   alias TradeIndicators.Util, as: U
   alias Decimal, as: D
@@ -19,7 +20,7 @@ defmodule Indicators.ATR do
             period: 14,
             method: :ema
 
-  def step(chart = %{list: atr_list, period: period, method: method}, bars)
+  def step(chart = %ATR{list: atr_list, period: period, method: method}, bars)
       when is_list(bars) and is_list(atr_list) and is_integer(period) and period > 1 do
     ts = L.last(bars)[:t] || 0
 
