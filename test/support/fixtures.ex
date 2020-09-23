@@ -89,9 +89,9 @@ defmodule TradeIndicators.Tests.Fixtures do
                       ]
                       |> E.map(&(&1 |> M.drop([:t]) |> U.decimals() |> M.put(:t, &1[:t])))
 
-  def fixture(:msft_m1_2020_07_27),
+  def get(:msft_m1_2020_07_27),
     do: @msft_m1_2020_07_27
 
-  def fixture(:msft_m1_2020_08_17),
+  def get(:msft_m1_2020_08_17),
     do: @msft_m1_2020_08_17
 end

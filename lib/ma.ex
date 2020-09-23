@@ -6,7 +6,7 @@ defmodule TradeIndicators.MA do
   @zero D.new(0)
 
   def safe_at(list, n) do
-    case E.at(list, n) do
+    case E.at(list, n - 1) do
       nil -> @zero
       num when is_float(num) -> D.from_float(num)
       num when is_integer(num) -> D.new(num)
@@ -34,13 +34,13 @@ defmodule TradeIndicators.MA do
     series =
       case period - length(series) do
         0 -> series
-        n when n < period -> for(_ <- 1..n, do: 0) ++ series
-        _ -> E.take(series, -period)
+        n when n < period -> series ++ for(_ <- 1..n, do: 0)
+        _ -> E.take(series, period)
       end
 
     n_sum =
       for i <- 1..period, reduce: 0 do
-        t -> D.mult(safe_at(series, i - 1), i) |> D.add(t)
+        t -> D.mult(safe_at(series, i), period - (i - 1)) |> D.add(t)
       end
 
     D.div(n_sum, D.mult(period, D.div(D.add(period, 1), 2)))

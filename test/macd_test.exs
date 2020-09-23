@@ -5,7 +5,7 @@ defmodule TradeIndicators.Tests.MACD do
   alias Decimal, as: D
   alias Enum, as: E
 
-  @msft_data TradeIndicators.Tests.Fixtures.fixture(:msft_m1_2020_07_27)
+  @msft_data TradeIndicators.Tests.Fixtures.get(:msft_m1_2020_07_27)
   @histogram [0.06, 0.06, 0.06, 0.06, 0.03, 0.01, -0.01]
   @signal [0.13, 0.14, 0.16, 0.17, 0.18, 0.18, 0.18]
   @macd [0.12, 0.10, 0.10, 0.11, 0.12, 0.12, 0.14, 0.16, 0.19, 0.20, 0.22, 0.23, 0.22, 0.19, 0.17]
@@ -34,13 +34,16 @@ defmodule TradeIndicators.Tests.MACD do
 
     test "values on MSFT 2020/07/31" do
       U.context(fn ->
-        {%{list: macd_list}, _} =
+        macd_list =
           @msft_data
           |> E.reduce({%MACD{}, []}, fn bar, {state, bars} ->
-            bars = bars ++ [bar]
+            bars = [bar | bars]
             state = MACD.step(state, bars)
             {state, bars}
           end)
+          |> case do
+            {%{list: macd_list}, _} -> macd_list |> E.reverse()
+          end
 
         n1 = E.at(macd_list, 0)
         n11 = E.at(macd_list, 10)

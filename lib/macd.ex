@@ -25,20 +25,22 @@ defmodule TradeIndicators.MACD do
     field :t, non_neg_integer()
   end
 
-  defp get_prev_macd(macd_list) when is_list(macd_list) do
-    case L.last(macd_list) do
-      nil -> {nil, nil, nil}
+  defp get_prev_macd([]), do: {nil, nil, nil}
+
+  defp get_prev_macd([last | _]) do
+    case last do
       %Item{ema1: a, ema2: b, sig: c} -> {a, b, c}
     end
   end
 
   def sma({key, src_list}, len) when is_list(src_list) and is_integer(len) do
-    tail = E.take(src_list, -len)
-
-    case {length(tail), L.first(tail), tail} do
-      {l, _, _} when l < len -> nil
-      {_, %{^key => nil}, _} -> nil
-      {_, _, tail} -> tail |> E.reduce(0, &D.add(M.get(&1, key), &2)) |> D.div(len)
+    case E.take(src_list, len) do
+      subset ->
+        case {length(subset), L.last(subset), subset} do
+          {l, _, _} when l < len -> nil
+          {_, %{^key => nil}, _} -> nil
+          {_, _, subset} -> subset |> E.reduce(0, &D.add(M.get(&1, key), &2)) |> D.div(len)
+        end
     end
   end
 
@@ -56,7 +58,7 @@ defmodule TradeIndicators.MACD do
 
       {{key, src_list, latest = %D{}}, nil, len}
       when is_list(src_list) and is_integer(len) and is_atom(key) ->
-        sma({key, src_list ++ [%{key => latest}]}, len)
+        sma({key, [%{key => latest} | src_list]}, len)
 
       {{_, _, latest = %D{}}, avg_prev = %D{}, len}
       when is_integer(len) ->
@@ -64,7 +66,7 @@ defmodule TradeIndicators.MACD do
 
       {{key, src_list}, avg_prev = %D{}, len}
       when is_list(src_list) and is_integer(len) and is_atom(key) ->
-        MA.ema({avg_prev, L.last(src_list)[key]}, len)
+        MA.ema({avg_prev, hd(src_list)[key]}, len)
     end
   end
 
@@ -96,9 +98,9 @@ defmodule TradeIndicators.MACD do
       macd: new_macd_line_pt,
       sig: new_signal_pt,
       his: new_histogram_pt,
-      t: L.last(bars)[:t]
+      t: hd(bars)[:t]
     }
 
-    %{macd_container | list: E.take(macd_list ++ [new_macd_map], -max_len)}
+    %{macd_container | list: E.take([new_macd_map | macd_list], max_len)}
   end
 end

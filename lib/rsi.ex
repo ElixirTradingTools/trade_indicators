@@ -28,7 +28,7 @@ defmodule TradeIndicators.RSI do
     case length(bars) do
       0 -> chart
       1 -> update_rsi_list(chart, bars)
-      _ -> update_rsi_list(chart, E.take(bars, -2))
+      _ -> update_rsi_list(chart, E.take(bars, 2))
     end
   end
 
@@ -37,30 +37,32 @@ defmodule TradeIndicators.RSI do
 
   def update_rsi_list(
         rsi_chart = %RSI{list: rsi_list, period: len},
-        [%{c: close_old}, %{c: close_new, t: ts}]
+        [%{c: close_new, t: ts}, %{c: close_old}]
       )
       when is_list(rsi_list) do
     delta = D.sub(close_new, close_old)
     gain_now = delta |> D.max(0)
     loss_now = delta |> D.min(0) |> D.abs()
 
-    new_rsi_item =
-      case length(rsi_list) do
-        l when l < len -> {nil, nil, nil}
-        ^len -> get_initial_gain_loss(rsi_list, {gain_now, loss_now}, len) |> calc_rsi()
-        _ -> calc_rs(rsi_list, gain_now, loss_now, len) |> calc_rsi()
-      end
-      |> new_rsi_struct(gain_now, loss_now, ts)
-
-    %{rsi_chart | list: rsi_list ++ [new_rsi_item]}
+    case length(rsi_list) do
+      l when l < len -> {nil, nil, nil}
+      ^len -> get_initial_gain_loss(rsi_list, {gain_now, loss_now}, len) |> calc_rsi()
+      _ -> calc_rs(rsi_list, gain_now, loss_now, len) |> calc_rsi()
+    end
+    |> new_rsi_struct(gain_now, loss_now, ts)
+    |> case do
+      new_rsi_item -> %{rsi_chart | list: [new_rsi_item | rsi_list]}
+    end
   end
 
   def new_rsi_struct({rsi, avg_g, avg_l}, gain, loss, ts),
     do: %Item{value: rsi, avg_gain: avg_g, avg_loss: avg_l, gain: gain, loss: loss, t: ts}
 
   def calc_rs(rsi_list, gain_now, loss_now, len) do
-    %Item{avg_gain: gain_last, avg_loss: loss_last} = E.at(rsi_list, -1)
-    {MA.rma(gain_last, gain_now, len), MA.rma(loss_last, loss_now, len)}
+    case hd(rsi_list) do
+      %Item{avg_gain: gain_last, avg_loss: loss_last} ->
+        {MA.rma(gain_last, gain_now, len), MA.rma(loss_last, loss_now, len)}
+    end
   end
 
   def calc_rsi({avg_gain = %D{}, avg_loss = %D{}}) do
@@ -76,6 +78,8 @@ defmodule TradeIndicators.RSI do
     E.reduce(rsi_list, {0, 0}, fn %{gain: gain, loss: loss}, {total_gain, total_loss} ->
       {D.add(total_gain, U.dec(gain)), D.add(total_loss, U.dec(loss))}
     end)
-    |> (fn {g, l} -> {D.div(D.add(g, gain_now), period), D.div(D.add(l, loss_now), period)} end).()
+    |> case do
+      {g, l} -> {D.div(D.add(g, gain_now), period), D.div(D.add(l, loss_now), period)}
+    end
   end
 end

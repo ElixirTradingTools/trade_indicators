@@ -4,26 +4,25 @@ defmodule TradeIndicators.Tests.RSI do
   alias TradeIndicators.RSI
   alias Enum, as: E
 
-  @msft_data TradeIndicators.Tests.Fixtures.fixture(:msft_m1_2020_08_17)
-  @expected_rsi_values [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] ++
-                         [62.22, 65.01, 52.65, 52.29, 57.78, 60.82, 61.77, 56.71, 57.19, 54.02] ++
-                         [55.95, 52.50, 53.65, 56.50, 60.02, 63.08, 62.81, 62.52, 62.21, 66.50] ++
-                         [71.07, 71.07, 69.65, 72.06]
+  @rsi_expected [72.06, 69.65, 71.07, 71.07, 66.50, 62.21, 62.52, 62.81, 63.08, 60.02] ++
+                  [56.50, 53.65, 52.50, 55.95, 54.02, 57.19, 56.71, 61.77, 60.82, 57.78] ++
+                  [52.29, 52.65, 65.01, 62.22, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] ++
+                  [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+  @msft_data TradeIndicators.Tests.Fixtures.get(:msft_m1_2020_08_17)
 
   describe "RSI" do
     test "step/2" do
       U.context(fn ->
-        {%{list: rsi_list}, _} =
-          @msft_data
-          |> E.reduce({%RSI{}, []}, fn bar, {state, bars} ->
-            bars = bars ++ [bar]
-            state = RSI.step(state, bars)
-            {state, bars}
+        result_list =
+          E.reduce(@msft_data, {%RSI{}, []}, fn bar, {state, bars} ->
+            bars = [bar | bars]
+            {RSI.step(state, bars), bars}
           end)
+          |> case do
+            {%{list: list}, _} -> E.map(list, fn %{value: v} -> U.rnd(v) end)
+          end
 
-        result_rsi = for %{value: rsi} <- rsi_list, do: U.rnd(rsi)
-
-        assert @expected_rsi_values == result_rsi
+        assert @rsi_expected == result_list
       end)
     end
   end

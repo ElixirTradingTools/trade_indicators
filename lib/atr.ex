@@ -25,24 +25,24 @@ defmodule TradeIndicators.ATR do
 
   def step(chart = %ATR{list: atr_list, period: period, method: method}, bars)
       when is_list(bars) and is_list(atr_list) and is_integer(period) and period > 1 do
-    ts = L.last(bars)[:t] || 0
+    ts = hd(bars)[:t] || 0
 
     case length(bars) do
       0 ->
         chart
 
       n when n < period ->
-        new_atr = %{avg: nil, t: ts, tr: E.take(bars, -2) |> get_tr()}
-        %{chart | list: atr_list ++ [new_atr]}
+        new_atr = %{avg: nil, t: ts, tr: E.take(bars, 2) |> get_tr()}
+        %{chart | list: [new_atr | atr_list]}
 
       _ ->
-        new_atr = E.take(bars, -2) |> get_tr() |> get_atr(atr_list, period, ts, method)
-        %{chart | list: atr_list ++ [new_atr]}
+        new_atr = E.take(bars, 2) |> get_tr() |> get_atr(atr_list, period, ts, method)
+        %{chart | list: [new_atr | atr_list]}
     end
   end
 
   def get_tr([%{c: c, h: h, l: l}]), do: get_tr(c, h, l)
-  def get_tr([%{c: c}, %{h: h, l: l}]), do: get_tr(c, h, l)
+  def get_tr([%{h: h, l: l}, %{c: c}]), do: get_tr(c, h, l)
 
   def get_tr(c = %D{}, h = %D{}, l = %D{}) do
     D.sub(h, l)
@@ -52,9 +52,11 @@ defmodule TradeIndicators.ATR do
 
   def make_tr_list(new_tr, atr_list, period) do
     atr_list
-    |> E.take(-(period - 1))
+    |> E.take(period - 1)
     |> E.map(fn %{tr: v} -> v || @zero end)
-    |> E.concat([new_tr])
+    |> case do
+      list -> [new_tr | list]
+    end
   end
 
   def get_atr(new_tr, atr_list, period, ts, avg_fn) when avg_fn in [:wma, :ema] do
@@ -75,15 +77,18 @@ defmodule TradeIndicators.ATR do
     if length(atr_list) == period - 1 do
       atr_list
       |> E.map(fn %{tr: tr} -> tr end)
-      |> E.concat([new_tr])
+      |> case do
+        list -> [new_tr | list]
+      end
       |> E.reduce(@zero, fn n, t -> D.add(t, U.dec(n)) end)
       |> D.div(period)
     else
       atr_list
-      |> L.last()
+      |> hd()
       |> M.get(:avg)
-      |> (fn last_tr -> {last_tr, new_tr} end).()
-      |> MA.ema(period)
+      |> case do
+        last_tr -> MA.ema({last_tr, new_tr}, period)
+      end
     end
   end
 end
