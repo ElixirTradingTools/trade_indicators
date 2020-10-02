@@ -5,7 +5,6 @@ defmodule TradeIndicators.ATR do
   alias TradeIndicators.MA
   alias TradeIndicators.Util, as: U
   alias Decimal, as: D
-  alias List, as: L
   alias Enum, as: E
   alias Map, as: M
 
