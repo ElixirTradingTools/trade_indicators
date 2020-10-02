@@ -5,10 +5,10 @@ Feedback and contributions are welcome.
 Unit tests are passing. Please refer to the tests to see how these are used.
 
 Each indicator is a state machine. Use the respective module struct for initial
-state. OHLC chart data is a list and each new bar is appended before passing it
+state. OHLCV chart data is a list and each new bar is prepended before passing it
 into the indicator `step/2` function. The indicator must be run once each time a
-new bar is appended. In the tests, you can see how to use `Enum.reduce/3` to run
-the indicator on your chart data.
+new bar is prepended or updated. In the tests, you can see how to use
+`Enum.reduce/3` to run the indicator on your chart data.
 
 
 ## Installation
@@ -20,8 +20,8 @@ def deps do
   [
     {
       :trade_indicators,
-      git: "https://github.com/rm-rf-etc/trade-indicators.git",
-      tag: "0.1.1"
+      git: "https://github.com/ElixirTradingTools/trade_indicators.git",
+      ref: "<commit hash here>"
     }
   ]
 end
