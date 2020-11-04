@@ -24,7 +24,11 @@ defmodule TradeIndicators.ATR do
 
   def step(chart = %ATR{list: atr_list, period: period, method: method}, bars)
       when is_list(bars) and is_list(atr_list) and is_integer(period) and period > 1 do
-    ts = hd(bars)[:t] || 0
+    ts =
+      case bars do
+        [%{t: t} | _] -> t
+        _ -> nil
+      end
 
     case length(bars) do
       0 ->
@@ -42,6 +46,12 @@ defmodule TradeIndicators.ATR do
 
   def get_tr([%{c: c, h: h, l: l}]), do: get_tr(c, h, l)
   def get_tr([%{h: h, l: l}, %{c: c}]), do: get_tr(c, h, l)
+
+  def get_tr(c, h, l)
+      when (is_binary(c) or is_integer(c)) and
+             (is_binary(h) or is_integer(h)) and
+             (is_binary(l) or is_integer(l)),
+      do: get_tr(D.new(c), D.new(h), D.new(l))
 
   def get_tr(c = %D{}, h = %D{}, l = %D{}) do
     D.sub(h, l)

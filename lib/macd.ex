@@ -66,7 +66,7 @@ defmodule TradeIndicators.MACD do
 
       {{key, src_list}, avg_prev = %D{}, len}
       when is_list(src_list) and is_integer(len) and is_atom(key) ->
-        MA.ema({avg_prev, hd(src_list)[key]}, len)
+        MA.ema({avg_prev, L.first(src_list)[key]}, len)
     end
   end
 
@@ -98,7 +98,7 @@ defmodule TradeIndicators.MACD do
       macd: new_macd_line_pt,
       sig: new_signal_pt,
       his: new_histogram_pt,
-      t: hd(bars)[:t]
+      t: L.first(bars)[:t]
     }
 
     %{macd_container | list: E.take([new_macd_map | macd_list], max_len)}
