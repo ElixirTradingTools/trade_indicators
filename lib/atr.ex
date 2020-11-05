@@ -30,20 +30,31 @@ defmodule TradeIndicators.ATR do
         _ -> nil
       end
 
-    case length(bars) do
-      0 ->
+    case {bars, atr_list} do
+      {[], _} ->
         chart
 
-      n when n < period ->
-        new_atr = %{avg: nil, t: ts, tr: E.take(bars, 2) |> get_tr()}
-        %{chart | list: [new_atr | atr_list]}
+      {[%{t: t1} | bars_tail], [%{t: t2} | atr_tail]} when t1 == t2 ->
+        if length(bars) < period do
+          new_atr = %{avg: nil, t: ts, tr: E.take(bars_tail, 2) |> get_tr()}
+          %{chart | list: [new_atr | atr_tail]}
+        else
+          new_atr = E.take(bars_tail, 2) |> get_tr() |> get_atr(atr_list, period, ts, method)
+          %{chart | list: [new_atr | tl(atr_list)]}
+        end
 
       _ ->
-        new_atr = E.take(bars, 2) |> get_tr() |> get_atr(atr_list, period, ts, method)
-        %{chart | list: [new_atr | atr_list]}
+        if length(bars) < period do
+          new_atr = %{avg: nil, t: ts, tr: E.take(bars, 2) |> get_tr()}
+          %{chart | list: [new_atr | atr_list]}
+        else
+          new_atr = E.take(bars, 2) |> get_tr() |> get_atr(atr_list, period, ts, method)
+          %{chart | list: [new_atr | atr_list]}
+        end
     end
   end
 
+  def get_tr([]), do: @zero
   def get_tr([%{c: c, h: h, l: l}]), do: get_tr(c, h, l)
   def get_tr([%{h: h, l: l}, %{c: c}]), do: get_tr(c, h, l)
 
